@@ -41,6 +41,10 @@
 	  window.onload = () => {
 		  var app = Elm.Main.init({
 			  node: document.querySelector('main'),
+			  flags: {
+				  windowWidth: window.innerWidth,
+				  windowHeight: window.innerHeight
+			  }
 		  })
 		  // you can use ports and stuff here
 	  }

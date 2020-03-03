@@ -58,11 +58,37 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
+type alias Flags =
+    { windowSize : Vec2
+    }
+
+
+flagsDecoder : D.Decoder Flags
+flagsDecoder =
+    D.map Flags
+        (D.map2 vec2
+            (D.at [ "windowWidth" ] D.float)
+            (D.at [ "windowHeight" ] D.float)
+        )
+
+
+defaultFlags : Flags
+defaultFlags =
+    { windowSize = ( 0, 0 )
+    }
+
+
+init : E.Value -> ( Model, Cmd Msg )
+init encodedFlags =
+    let
+        flags =
+            Result.withDefault
+                defaultFlags
+                (D.decodeValue flagsDecoder encodedFlags)
+    in
     ( { pos = ( 50, 50 )
       , grabbedAt = Nothing
-      , screenSize = ( 0, 0 )
+      , screenSize = flags.windowSize
       }
     , Cmd.none
     )
@@ -183,14 +209,25 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    BrowserEvents.onResize (\a b -> ScreenSize ( toFloat a, toFloat b ))
+    Sub.batch <|
+        List.concat
+            [ [ BrowserEvents.onResize (\a b -> ScreenSize ( toFloat a, toFloat b ))
+              , BrowserEvents.onMouseUp (D.succeed Drop)
+              ]
+            , case model.grabbedAt of
+                Just pos ->
+                    [ BrowserEvents.onMouseMove (D.map Drag mouseEventDecoder) ]
+
+                Nothing ->
+                    []
+            ]
 
 
 
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program E.Value Model Msg
 main =
     Browser.element
         { init = init
