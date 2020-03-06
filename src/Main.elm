@@ -184,6 +184,7 @@ view model =
         [ div
             (List.concat
                 [ [ Attributes.id "box"
+                  , Attributes.class "hexagon"
                   , Attributes.class "noselect"
                   ]
                 , case model.grabbedAt of
@@ -195,11 +196,13 @@ view model =
                 , posAttr model.pos
                 ]
             )
-            [ text "hm"
+            []
+
+        {--[ text "hm"
 
             -- <| Maybe.withDefault "hm"
             -- <| Maybe.map (Tuple.first >> String.fromFloat) model.grabbedAt
-            ]
+            ]--}
         ]
 
 
